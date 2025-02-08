@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon.png') }}">
+    <title>Spotify Web Player</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+</head>
+<body>
+    {% if access_token %}
+    <div id="player-container">
+        <div id="player">
+            <!-- Top: Album Cover -->
+            <img id="album-cover" src="" alt="Album Cover" style="display: none;">
+    
+            <!-- Control Buttons (Including Playlist Toggle) -->
+            <div id="player-controls">
+                <button onclick="prevTrack()"><i class="fas fa-step-backward"></i></button>
+                <button onclick="togglePlayPause()" id="play-pause"><i class="fas fa-play"></i></button>
+                <button onclick="nextTrack()"><i class="fas fa-step-forward"></i></button>
+    
+                <!-- Toggle Playlist Button -->
+                <button id="toggle-playlist-btn" onclick="togglePlaylist()">
+                    <i class="fa-solid fa-list"></i>
+                </button>
+            </div>
+    
+            <!-- Bottom: Progress Bar with Time -->
+            <div id="progress-container">
+                <span id="current-time">0:00</span>
+                <input type="range" id="progress-bar" value="0" max="100">
+                <span id="total-time">0:00</span>
+            </div>
+        </div>
+    
+        <!-- Playlist Window -->
+        <div id="playlist" class="hidden">
+            <h2>Playlist</h2>
+            <ul id="playlist-tracks"></ul>
+        </div>
+    </div>
+    
+
+    <script>
+        const token = "{{ access_token }}";
+        let player;
+        let isPlaying = false;
+
+        // Initialize Spotify Web Playback SDK
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            player = new Spotify.Player({
+                name: 'Web Playback SDK Player',
+                getOAuthToken: cb => { cb(token); },
+                volume: 0.5
+            });
+
+            player.addListener('player_state_changed', (state) => {
+                if (!state) return;
+
+                const { current_track, duration, position } = state.track_window;
+                updateTrackDetails(current_track);
+                updateProgress(position, duration);
+
+                isPlaying = !state.paused;
+                document.getElementById('play-pause').innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            });
+
+            player.addListener('ready', ({ device_id }) => {
+                fetch("https://api.spotify.com/v1/me/player", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        "device_ids": [device_id],
+                        "play": true
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        console.log('Player set as active device');
+                    } else {
+                        console.error('Failed to set player as active device');
+                    }
+                });
+            });
+
+            player.connect();
+
+            // Remove fetchPlaylistTracks call since we only want JSON data
+        };
+
+        function updateTrackDetails(track) {
+            if (track && track.album && track.album.images.length > 0) {
+                document.getElementById('album-cover').src = track.album.images[0].url;
+                document.getElementById('album-cover').style.display = 'block';
+                document.getElementById('current-time').textContent = formatTime(0);
+                document.getElementById('total-time').textContent = formatTime(track.duration_ms);
+                document.getElementById('progress-bar').max = track.duration_ms;
+            } else {
+                document.getElementById('album-cover').style.display = 'none';
+            }
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                player.pause();
+            } else {
+                player.resume();
+            }
+            isPlaying = !isPlaying;
+            document.getElementById('play-pause').innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+
+        function prevTrack() {
+            player.previousTrack();
+        }
+
+        function nextTrack() {
+            console.log("Previous track button clicked");
+            player.nextTrack();
+        }
+
+        function updateProgress(position, duration) {
+            document.getElementById('progress-bar').value = position;
+            document.getElementById('current-time').textContent = formatTime(position);
+            document.getElementById('total-time').textContent = formatTime(duration);
+        }
+
+        function formatTime(ms) {
+            const minutes = Math.floor(ms / 60000);
+            const seconds = ((ms % 60000) / 1000).toFixed(0);
+            return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+        }
+
+        // Function to load tracks from JSON
+        function loadPlaylistFromJSON() {
+            fetch('/data/songs.json') // Adjust path if needed
+                .then(response => response.json())
+                .then(data => {
+                    const playlistTracks = document.getElementById('playlist-tracks');
+                    playlistTracks.innerHTML = ''; // Clear current content
+        
+                    data.forEach(track => {
+                        const trackElement = document.createElement('li');
+                        trackElement.classList.add('playlist-item');
+                        trackElement.innerHTML = `
+                            <img src="${track.albumCover}" alt="Album Cover" class="track-cover">
+                            <div class="track-info">
+                                <span class="track-name">${track.name}</span>
+                                <span class="track-artist">${track.artist}</span>
+                            </div>
+                        `;
+                        trackElement.onclick = () => playTrack(track.spotify_uri); // Use "spotify_uri" here
+                        playlistTracks.appendChild(trackElement);
+                    });
+                })
+                .catch(error => console.error('Error loading playlist:', error));
+        }   
+        function playTrack(uri) {
+            fetch("https://api.spotify.com/v1/me/player/play", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ uris: [uri] })
+            }).catch(error => console.error('Error playing track:', error));
+        }
+
+        function togglePlaylist() {
+            const playlist = document.getElementById('playlist');
+            playlist.classList.toggle('hidden');
+        }
+        
+        // Load playlist from JSON on page load
+        window.onload = loadPlaylistFromJSON;
+
+        setInterval(() => {
+            if (isPlaying && player) {
+                player.getCurrentState().then(state => {
+                    if (state) {
+                        updateProgress(state.position, state.duration);
+                    }
+                });
+            }
+        }, 1000);
+    </script>
+    {% else %}
+    <a href="{{ auth_url }}">Log in with Spotify</a>
+    {% endif %}
+</body>
+</html>

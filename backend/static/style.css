@@ -1,0 +1,210 @@
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #121212;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+/* Player Styling */
+#player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+}
+
+#album-cover {
+    width: 400px;
+    height: 400px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+#album-cover:hover {
+    transform: scale(1.05);
+}
+
+/* Control Buttons */
+#player-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #1DB954;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #FFFFFF;
+    transition: background-color 0.2s;
+    outline: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button:hover {
+    background-color: #1ed760;
+}
+
+button:active {
+    background-color: #1aa34a;
+}
+
+/* Progress Bar */
+#progress-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    margin-top: 10px;
+    
+}
+
+#current-time, #total-time {
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+#progress-bar {
+    flex-grow: 1;
+    appearance: none;
+    height: 5px;
+    background: #1DB954;
+    border-radius: 2.5px;
+    outline: none;
+}
+
+#progress-bar::-webkit-slider-thumb {
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#player-container {
+    display: flex;
+    gap: 20px; /* Space between player, playlist, and next songs sections */
+}
+
+#player {
+    flex: 1; /* Player takes up remaining height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#playlist {
+    width: 350px;
+    background-color: rgba(40, 40, 40, 0.6); /* Single semi-transparent background */
+    color: #ffffff;
+    border-left: 1px solid rgba(51, 51, 51, 0.8);
+    overflow-y: auto;
+    height: 25vh;
+    max-height: 70vh;
+    scrollbar-width: none; /* Hide scrollbar in Firefox */
+    backdrop-filter: blur(10px); /* Optional: Adds a blur effect */
+    opacity: 0.9; /* Additional transparency */
+}
+
+/* Hide scrollbar in WebKit browsers (Chrome, Safari) */
+#playlist::-webkit-scrollbar {
+    display: none;
+}
+
+
+#playlist h2 {
+    margin-top: 0;
+    text-align: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+}
+
+#playlist ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+}
+
+.playlist-item:hover {
+    background-color: #333;
+}
+
+.track-cover {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+    border-radius: 4px;
+}
+
+.track-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.track-name {
+    font-size: 17px;
+    font-weight: bold;
+    color: #ffffff;
+    text-align: left;
+}
+
+.track-artist {
+    font-size: 14px;
+    color: #b3b3b3;
+    text-align: left;
+}
+
+#toggle-playlist-btn {
+    background-color: #1DB954;
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #FFFFFF;
+    transition: background-color 0.2s;
+    outline: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px; /* Adjust spacing as needed */
+}
+
+#toggle-playlist-btn:hover {
+    background-color: #1ed760;
+}
+
+#toggle-playlist-btn:active {
+    background-color: #1aa34a;
+}
+
+/* Initially hide the playlist */
+#playlist.hidden {
+    display: none;
+}
