@@ -2,10 +2,9 @@
 
 **EmoDrive** is a Flutter web application designed for driverless taxis, enhancing the passenger experience through personalized music recommendations based on real-time emotion detection. By analyzing the user's facial expressions, EmoDrive suggests suitable music from Spotify, creating a more enjoyable and tailored ride.
 
-<video width="640" height="360" controls>
-  <source src="./ui/assets/videos/video.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+
+## Short demo of EmoDrive
+[![EmoDrive Demo](https://img.youtube.com/vi/I4h4nNY3gUw/0.jpg)](https://youtu.be/I4h4nNY3gUw)
 
 ## Features
 
